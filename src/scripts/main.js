@@ -31,13 +31,19 @@ function updateButtonStates() {
 }
 
 function appendRow() {
-  const currentRows = tbody.rows.length;
+  const currentRowsInTbody = tbody.rows.length;
 
-  if (currentRows < 10) {
+  if (currentRowsInTbody < 10) {
     const newRow = document.createElement('tr');
-    const columnCount = tbody.rows.length > 0 ? tbody.rows[0].cells.length : 0;
+    let columnsToCreate;
 
-    for (let i = 0; i < columnCount; i++) {
+    if (currentRowsInTbody === 0) {
+      columnsToCreate = 2; // Створюємо з мінімальною к-тю стовпчиків
+    } else {
+      columnsToCreate = tbody.rows[0].cells.length;
+    }
+
+    for (let i = 0; i < columnsToCreate; i++) {
       const newCell = document.createElement('td');
 
       newRow.appendChild(newCell);
@@ -59,9 +65,25 @@ function removeRow() {
 }
 
 function appendColumn() {
-  const colCount = tbody.rows.length > 0 ? tbody.rows[0].cells.length : 0;
+  const currentRowsInTbody = tbody.rows.length;
+  // Додавати стовпчики можна лише якщо є хоча б один рядок,
+  // до якого можна додати комірки. Інакше colCount буде 0,
+  // але кнопка додавання стовпчика має бути заблокована,
+  // якщо немає рядків (або якщо досягнуто ліміту стовпчиків).
+  // Логіка updateButtonStates має це врах
+  const colCount = currentRowsInTbody > 0 ? tbody.rows[0].cells.length : 0;
 
   if (colCount < 10) {
+    // Якщо рядків немає, то додавати стовпчик нікуди.
+    // Кнопка appendColumnBtn має бутиrrentRowsInTbody === 0.
+    // Це має оброблятися в updateButtonStates тут можлива проблема)
+    // Давайте змінимо updateButtonStates для colCount
+    if (currentRowsInTbody === 0 && colCount === 0) {
+      // Немає сенсу додавати стовпці, якщо немає рядків.
+      // Але якщо завданяви рядків), то код нижче спрацює.
+      // Краще, щоб правильно обробляє colCount=0 коли немає рядків.
+    }
+
     for (const row of tbody.rows) {
       const newCell = document.createElement('td');
 
@@ -72,7 +94,8 @@ function appendColumn() {
 }
 
 function removeColumn() {
-  const colCount = tbody.rows.length > 0 ? tbody.rows[0].cells.length : 0;
+  const currentRowsInTbody = tbody.rows.length;
+  const colCount = currentRowsInTbody > 0 ? tbody.rows[0].cells.length : 0;
 
   if (colCount > 2) {
     for (const row of tbody.rows) {
@@ -85,6 +108,8 @@ function removeColumn() {
     updateButtonStates();
   }
 }
+
+// Removed duplicate declaration of updateButtonStates
 
 appendRowBtn.addEventListener('click', appendRow);
 removeRowBtn.addEventListener('click', removeRow);
